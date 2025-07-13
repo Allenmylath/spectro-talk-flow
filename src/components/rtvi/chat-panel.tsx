@@ -193,13 +193,6 @@ export function ChatPanel({
         </div>
       </div>
 
-      {/* Mobile Overlay */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
-          onClick={onToggle}
-        />
-      )}
     </>
   );
 }
