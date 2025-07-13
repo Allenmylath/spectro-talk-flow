@@ -11,6 +11,7 @@ import {
   User
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import aiAvatarHero from "@/assets/ai-avatar-hero.jpg";
 
 interface VideoInterfaceProps {
@@ -53,7 +54,8 @@ export function VideoInterface({
   }, []);
 
   return (
-    <div className={cn("video-container group", className)}>
+    <TooltipProvider>
+      <div className={cn("video-container group", className)}>
       {/* User Video Feed */}
       <div className="relative w-full h-full">
         {videoState.isVideoEnabled && videoState.hasVideo ? (
@@ -116,59 +118,87 @@ export function VideoInterface({
 
         {/* Video Controls Overlay */}
         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 bg-black/70 backdrop-blur-sm rounded-lg p-3 opacity-90 hover:opacity-100 transition-opacity duration-200 z-50 pointer-events-auto">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onVideoToggle}
-            className={cn(
-              "h-10 w-10 p-0 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 transition-all duration-200",
-              videoState.isVideoEnabled 
-                ? "text-white hover:text-white" 
-                : "text-red-400 hover:text-red-300"
-            )}
-          >
-            {videoState.isVideoEnabled ? (
-              <Video className="h-4 w-4" />
-            ) : (
-              <VideoOff className="h-4 w-4" />
-            )}
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onVideoToggle}
+                className={cn(
+                  "h-10 w-10 p-0 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 transition-all duration-200",
+                  videoState.isVideoEnabled 
+                    ? "text-white hover:text-white" 
+                    : "text-red-400 hover:text-red-300"
+                )}
+              >
+                {videoState.isVideoEnabled ? (
+                  <Video className="h-4 w-4" />
+                ) : (
+                  <VideoOff className="h-4 w-4" />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{videoState.isVideoEnabled ? "Turn off camera" : "Turn on camera"}</p>
+            </TooltipContent>
+          </Tooltip>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onAudioToggle}
-            className={cn(
-              "h-10 w-10 p-0 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 transition-all duration-200",
-              !videoState.isMuted 
-                ? "text-white hover:text-white" 
-                : "text-red-400 hover:text-red-300"
-            )}
-          >
-            {!videoState.isMuted ? (
-              <Mic className="h-4 w-4" />
-            ) : (
-              <MicOff className="h-4 w-4" />
-            )}
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onAudioToggle}
+                className={cn(
+                  "h-10 w-10 p-0 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 transition-all duration-200",
+                  !videoState.isMuted 
+                    ? "text-white hover:text-white" 
+                    : "text-red-400 hover:text-red-300"
+                )}
+              >
+                {!videoState.isMuted ? (
+                  <Mic className="h-4 w-4" />
+                ) : (
+                  <MicOff className="h-4 w-4" />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{!videoState.isMuted ? "Mute microphone" : "Unmute microphone"}</p>
+            </TooltipContent>
+          </Tooltip>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={toggleFullscreen}
-            className="h-10 w-10 p-0 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white hover:text-white transition-all duration-200"
-          >
-            <Maximize2 className="h-4 w-4" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleFullscreen}
+                className="h-10 w-10 p-0 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white hover:text-white transition-all duration-200"
+              >
+                <Maximize2 className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Enter fullscreen</p>
+            </TooltipContent>
+          </Tooltip>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onSettingsClick}
-            className="h-10 w-10 p-0 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white hover:text-white transition-all duration-200"
-          >
-            <Settings className="h-4 w-4" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onSettingsClick}
+                className="h-10 w-10 p-0 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white hover:text-white transition-all duration-200"
+              >
+                <Settings className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Video settings</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
 
         {/* Status Indicators */}
@@ -199,6 +229,7 @@ export function VideoInterface({
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </TooltipProvider>
   );
 }
