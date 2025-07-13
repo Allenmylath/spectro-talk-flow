@@ -2,11 +2,11 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { 
-  useRTVIClient,
-  useRTVIClientTransportState,
-  useRTVIClientEvent,
-  RTVIClientAudio,
-  RTVIClientVideo
+  usePipecatClient,
+  usePipecatClientTransportState,
+  usePipecatClientEvent,
+  PipecatClientAudio,
+  PipecatClientVideo
 } from '@pipecat-ai/client-react';
 import { 
   RTVIEvent,
@@ -45,8 +45,8 @@ export function RTVIClient({ className }: RTVIClientProps) {
 
 // Main interface component - enhanced with real RTVI backend connection
 function RTVIInterface({ className }: { className?: string }) {
-  const client = useRTVIClient();
-  const transportState = useRTVIClientTransportState();
+  const client = usePipecatClient();
+  const transportState = usePipecatClientTransportState();
 
   // State management
   const [connectionState, setConnectionState] = useState<RTVIConnectionState>({
@@ -111,14 +111,14 @@ function RTVIInterface({ className }: { className?: string }) {
   }, [client, transportState]);
 
   // RTVI Event Handlers
-  useRTVIClientEvent(
+  usePipecatClientEvent(
     RTVIEvent.TransportStateChanged,
     useCallback((state: TransportState) => {
       console.log(`Transport state changed: ${state}`);
     }, [])
   );
 
-  useRTVIClientEvent(
+  usePipecatClientEvent(
     RTVIEvent.BotConnected,
     useCallback((participant?: Participant) => {
       console.log('Bot connected:', participant);
@@ -129,7 +129,7 @@ function RTVIInterface({ className }: { className?: string }) {
     }, [])
   );
 
-  useRTVIClientEvent(
+  usePipecatClientEvent(
     RTVIEvent.BotDisconnected,
     useCallback((participant?: Participant) => {
       console.log('Bot disconnected:', participant);
@@ -140,7 +140,7 @@ function RTVIInterface({ className }: { className?: string }) {
     }, [])
   );
 
-  useRTVIClientEvent(
+  usePipecatClientEvent(
     RTVIEvent.UserTranscript,
     useCallback((data: TranscriptData) => {
       if (data.final) {
@@ -156,7 +156,7 @@ function RTVIInterface({ className }: { className?: string }) {
     }, [])
   );
 
-  useRTVIClientEvent(
+  usePipecatClientEvent(
     RTVIEvent.BotTranscript,
     useCallback((data: BotLLMTextData) => {
       const botMessage: RTVIMessage = {
@@ -170,29 +170,29 @@ function RTVIInterface({ className }: { className?: string }) {
     }, [])
   );
 
-  useRTVIClientEvent(
+  usePipecatClientEvent(
     RTVIEvent.UserStartedSpeaking,
     useCallback(() => {
       setIsListening(true);
     }, [])
   );
 
-  useRTVIClientEvent(
+  usePipecatClientEvent(
     RTVIEvent.UserStoppedSpeaking,
     useCallback(() => {
       setIsListening(false);
     }, [])
   );
 
-  useRTVIClientEvent(
-    RTVIEvent.BotLLMStarted,
+  usePipecatClientEvent(
+    RTVIEvent.BotLlmStarted,
     useCallback(() => {
       setIsTyping(true);
     }, [])
   );
 
-  useRTVIClientEvent(
-    RTVIEvent.BotLLMStopped,
+  usePipecatClientEvent(
+    RTVIEvent.BotLlmStopped,
     useCallback(() => {
       setIsTyping(false);
     }, [])
@@ -387,7 +387,7 @@ function RTVIInterface({ className }: { className?: string }) {
             <div className="relative">
               {isConnected ? (
                 <div className="video-container">
-                  <RTVIClientVideo 
+                  <PipecatClientVideo 
                     participant="bot" 
                     fit="cover" 
                     style={{ width: '100%', height: '100%' }}
@@ -447,7 +447,7 @@ function RTVIInterface({ className }: { className?: string }) {
       </div>
 
       {/* Audio Component */}
-      <RTVIClientAudio />
+      <PipecatClientAudio />
     </div>
   );
 }

@@ -1,13 +1,13 @@
 // src/providers/RTVIProvider.tsx
 import { type PropsWithChildren } from 'react';
-import { RTVIClient } from '@pipecat-ai/client-js';
+import { PipecatClient } from '@pipecat-ai/client-js';
 import { DailyTransport } from '@pipecat-ai/daily-transport';
-import { RTVIClientProvider } from '@pipecat-ai/client-react';
+import { PipecatClientProvider } from '@pipecat-ai/client-react';
 import { RTVI_CONFIG } from '@/config/rtvi';
 
 const transport = new DailyTransport();
 
-const client = new RTVIClient({
+const client = new PipecatClient({
   transport,
   params: {
     baseUrl: RTVI_CONFIG.baseUrl,
@@ -21,5 +21,5 @@ const client = new RTVIClient({
 });
 
 export function RTVIProvider({ children }: PropsWithChildren) {
-  return <RTVIClientProvider client={client}>{children}</RTVIClientProvider>;
+  return <PipecatClientProvider client={client}>{children}</PipecatClientProvider>;
 }
