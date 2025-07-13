@@ -1,3 +1,4 @@
+// src/pages/Index.tsx
 import { RTVIClient } from "@/components/rtvi/rtvi-client";
 
 const Index = () => {
