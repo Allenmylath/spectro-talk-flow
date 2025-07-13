@@ -1,105 +1,253 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* RTVI Client Design System - Modern Multi-Modal Interface */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Modern Background System */
+    --background: 245 247 250;
+    --background-secondary: 248 250 252;
+    --background-glass: 255 255 255 / 0.7;
+    --foreground: 15 23 42;
+    
+    /* Glass Effect Overlays */
+    --glass-light: 255 255 255 / 0.1;
+    --glass-medium: 255 255 255 / 0.2;
+    --glass-strong: 255 255 255 / 0.4;
+    
+    /* Modern Primary - Blue-Purple Gradient System */
+    --primary: 236 72 153;
+    --primary-light: 244 114 182;
+    --primary-dark: 219 39 119;
+    --primary-foreground: 255 255 255;
+    
+    /* Secondary - Sophisticated Purple */
+    --secondary: 139 92 246;
+    --secondary-light: 167 139 250;
+    --secondary-dark: 124 58 237;
+    --secondary-foreground: 255 255 255;
+    
+    /* Accent - Electric Blue */
+    --accent: 59 130 246;
+    --accent-light: 96 165 250;
+    --accent-dark: 37 99 235;
+    --accent-foreground: 255 255 255;
+    
+    /* Status Colors */
+    --success: 34 197 94;
+    --success-light: 74 222 128;
+    --warning: 245 158 11;
+    --warning-light: 251 191 36;
+    --destructive: 239 68 68;
+    --destructive-light: 248 113 113;
+    
+    /* Neutral Palette */
+    --muted: 241 245 249;
+    --muted-foreground: 100 116 139;
+    --card: 255 255 255;
+    --card-foreground: 15 23 42;
+    --border: 226 232 240;
+    --input: 241 245 249;
+    --ring: 236 72 153;
+    
+    /* AI Interface Specific */
+    --ai-indicator: 34 197 94;
+    --user-message: 59 130 246;
+    --bot-message: 139 92 246;
+    --connection-active: 34 197 94;
+    --connection-inactive: 156 163 175;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(236 72% 53%), hsl(219 39% 59%));
+    --gradient-secondary: linear-gradient(135deg, hsl(139 92% 76%), hsl(124 58% 67%));
+    --gradient-accent: linear-gradient(135deg, hsl(59 130% 76%), hsl(37 99% 65%));
+    --gradient-glass: linear-gradient(135deg, hsl(var(--glass-light)), hsl(var(--glass-medium)));
+    --gradient-mesh: linear-gradient(135deg, hsl(236 72% 53% / 0.1), hsl(139 92% 76% / 0.1), hsl(59 130% 76% / 0.1));
+    
+    /* Shadows for Depth */
+    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.1), 0 2px 4px -2px hsl(0 0% 0% / 0.1);
+    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.1), 0 4px 6px -4px hsl(0 0% 0% / 0.1);
+    --shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.1), 0 8px 10px -6px hsl(0 0% 0% / 0.1);
+    --shadow-glow: 0 0 20px hsl(236 72% 53% / 0.3);
+    --shadow-glow-accent: 0 0 20px hsl(59 130% 76% / 0.3);
+    
+    /* Animation & Transitions */
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+    
+    --radius: 0.75rem;
+    --radius-sm: 0.5rem;
+    --radius-lg: 1rem;
+    --radius-xl: 1.5rem;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Dark Mode - Professional Dark Theme */
+    --background: 3 7 18;
+    --background-secondary: 7 11 22;
+    --background-glass: 15 23 42 / 0.7;
+    --foreground: 248 250 252;
+    
+    /* Dark Glass Effects */
+    --glass-light: 255 255 255 / 0.05;
+    --glass-medium: 255 255 255 / 0.1;
+    --glass-strong: 255 255 255 / 0.15;
+    
+    /* Dark Mode Colors */
+    --card: 15 23 42;
+    --card-foreground: 248 250 252;
+    --muted: 30 41 59;
+    --muted-foreground: 148 163 184;
+    --border: 30 41 59;
+    --input: 30 41 59;
+    
+    /* Enhanced Gradients for Dark Mode */
+    --gradient-primary: linear-gradient(135deg, hsl(236 72% 63%), hsl(219 39% 69%));
+    --gradient-secondary: linear-gradient(135deg, hsl(139 92% 66%), hsl(124 58% 77%));
+    --gradient-accent: linear-gradient(135deg, hsl(59 130% 66%), hsl(37 99% 75%));
+    --gradient-glass: linear-gradient(135deg, hsl(var(--glass-light)), hsl(var(--glass-medium)));
+    --gradient-mesh: linear-gradient(135deg, hsl(236 72% 63% / 0.1), hsl(139 92% 66% / 0.1), hsl(59 130% 66% / 0.1));
+    
+    /* Enhanced Glows for Dark Mode */
+    --shadow-glow: 0 0 30px hsl(236 72% 63% / 0.4);
+    --shadow-glow-accent: 0 0 30px hsl(59 130% 66% / 0.4);
   }
-}
-
-@layer base {
+  
   * {
     @apply border-border;
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-body antialiased;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   }
+  
+  /* Smooth Scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  /* Glass Effect Components */
+  .glass-panel {
+    @apply bg-glass-light backdrop-blur-md border border-glass-medium rounded-xl;
+  }
+  
+  .glass-card {
+    @apply bg-card/80 backdrop-blur-md border border-border/50 rounded-lg shadow-glass;
+  }
+  
+  /* Gradient Buttons */
+  .btn-gradient-primary {
+    @apply bg-gradient-primary text-primary-foreground shadow-lg hover:shadow-glow transition-all duration-300;
+  }
+  
+  .btn-gradient-secondary {
+    @apply bg-gradient-secondary text-secondary-foreground shadow-lg hover:shadow-glow-accent transition-all duration-300;
+  }
+  
+  /* Connection Status Indicators */
+  .status-indicator {
+    @apply relative inline-flex h-3 w-3 rounded-full;
+  }
+  
+  .status-indicator.connected {
+    @apply bg-success;
+  }
+  
+  .status-indicator.connecting {
+    @apply bg-warning animate-pulse;
+  }
+  
+  .status-indicator.disconnected {
+    @apply bg-destructive;
+  }
+  
+  /* Message Bubbles */
+  .message-bubble-user {
+    @apply bg-ai-user text-white rounded-2xl rounded-br-md px-4 py-3 shadow-md max-w-xs ml-auto;
+  }
+  
+  .message-bubble-bot {
+    @apply bg-ai-bot text-white rounded-2xl rounded-bl-md px-4 py-3 shadow-md max-w-xs mr-auto;
+  }
+  
+  /* Hover Animations */
+  .hover-scale {
+    @apply transition-transform duration-300 hover:scale-105;
+  }
+  
+  .hover-glow {
+    @apply transition-all duration-300 hover:shadow-glow;
+  }
+  
+  /* File Upload Zone */
+  .upload-zone {
+    @apply border-2 border-dashed border-border rounded-xl p-8 text-center transition-all duration-300;
+  }
+  
+  .upload-zone.dragover {
+    @apply border-primary bg-primary/5 scale-105;
+  }
+  
+  /* Video Container */
+  .video-container {
+    @apply relative aspect-video bg-muted rounded-xl overflow-hidden shadow-lg;
+  }
+  
+  .video-controls {
+    @apply absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 bg-black/50 backdrop-blur-sm rounded-full px-4 py-2;
+  }
+}
+
+@layer utilities {
+  /* Animation Classes */
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.4s ease-out;
+  }
+  
+  .animate-pulse-glow {
+    animation: pulseGlow 2s ease-in-out infinite;
+  }
+  
+  /* Text Gradients */
+  .text-gradient-primary {
+    @apply bg-gradient-primary bg-clip-text text-transparent;
+  }
+  
+  .text-gradient-secondary {
+    @apply bg-gradient-secondary bg-clip-text text-transparent;
+  }
+  
+  /* Mesh Background */
+  .bg-mesh {
+    @apply bg-gradient-mesh;
+  }
+}
+
+/* Custom Keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 5px hsl(var(--primary) / 0.5); }
+  50% { box-shadow: 0 0 20px hsl(var(--primary) / 0.8), 0 0 30px hsl(var(--primary) / 0.4); }
 }
