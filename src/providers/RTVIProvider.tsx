@@ -10,12 +10,9 @@ const transport = new DailyTransport();
 const client = new RTVIClient({
   transport,
   params: {
-    baseUrl: "wss://api.pipecat.ai/v1/rtvi",
-    services: {
-      stt: "deepgram",
-      llm: "openai", 
-      tts: "cartesia"
-    }
+    baseUrl: RTVI_CONFIG.baseUrl,
+    services: RTVI_CONFIG.services,
+    config: RTVI_CONFIG.config
   },
   enableMic: true,
   enableCam: true,
