@@ -1,8 +1,11 @@
+// src/components/rtvi/header.tsx
 import { cn } from "@/lib/utils";
 import { RTVIConnectionState } from "@/types/rtvi";
 import { 
   Zap, 
   FileText,
+  BarChart3,
+  FolderOpen,
   Settings,
   Power,
   PowerOff
@@ -15,8 +18,12 @@ interface RTVIHeaderProps {
   onConnect: () => void;
   onDisconnect: () => void;
   onToggleTranscription: () => void;
+  onToggleAnalytics: () => void;
+  onToggleFileManager: () => void;
   onOpenSettings: () => void;
   isTranscriptionOpen?: boolean;
+  isAnalyticsOpen?: boolean;
+  isFileManagerOpen?: boolean;
   className?: string;
 }
 
@@ -25,8 +32,12 @@ export function RTVIHeader({
   onConnect,
   onDisconnect,
   onToggleTranscription,
+  onToggleAnalytics,
+  onToggleFileManager,
   onOpenSettings,
   isTranscriptionOpen = false,
+  isAnalyticsOpen = false,
+  isFileManagerOpen = false,
   className
 }: RTVIHeaderProps) {
   const isConnected = connectionState.status === 'connected';
@@ -57,7 +68,7 @@ export function RTVIHeader({
 
       {/* Controls */}
       <div className="flex items-center gap-2">
-        {/* Panel Toggle */}
+        {/* Panel Toggles */}
         <div className="flex items-center gap-1 mr-4">
           <Button
             variant={isTranscriptionOpen ? "default" : "ghost"}
@@ -67,6 +78,26 @@ export function RTVIHeader({
           >
             <FileText className="h-4 w-4 mr-2" />
             Transcription
+          </Button>
+
+          <Button
+            variant={isAnalyticsOpen ? "default" : "ghost"}
+            size="sm"
+            onClick={onToggleAnalytics}
+            className="hover-scale"
+          >
+            <BarChart3 className="h-4 w-4 mr-2" />
+            Analytics
+          </Button>
+
+          <Button
+            variant={isFileManagerOpen ? "default" : "ghost"}
+            size="sm"
+            onClick={onToggleFileManager}
+            className="hover-scale"
+          >
+            <FolderOpen className="h-4 w-4 mr-2" />
+            Files
           </Button>
         </div>
 
