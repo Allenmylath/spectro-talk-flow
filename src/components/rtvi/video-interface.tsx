@@ -6,8 +6,6 @@ import {
   VideoOff, 
   Mic, 
   MicOff, 
-  MonitorSpeaker, 
-  MonitorOff,
   Settings,
   Maximize2,
   User
@@ -19,8 +17,8 @@ interface VideoInterfaceProps {
   videoState: RTVIVideoState;
   onVideoToggle: () => void;
   onAudioToggle: () => void;
-  onScreenShareToggle: () => void;
   onSettingsClick: () => void;
+  isRecording?: boolean;
   className?: string;
 }
 
@@ -28,8 +26,8 @@ export function VideoInterface({
   videoState,
   onVideoToggle,
   onAudioToggle,
-  onScreenShareToggle,
   onSettingsClick,
+  isRecording = false,
   className
 }: VideoInterfaceProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -56,12 +54,12 @@ export function VideoInterface({
 
   return (
     <div className={cn("video-container group", className)}>
-      {/* Bot Video Feed */}
+      {/* User Video Feed */}
       <div className="relative w-full h-full">
-        {videoState.hasVideo ? (
+        {videoState.isVideoEnabled && videoState.hasVideo ? (
           <video
             ref={videoRef}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transform scale-x-[-1]"
             autoPlay
             playsInline
             muted
@@ -77,22 +75,36 @@ export function VideoInterface({
           >
             <div className="text-center space-y-6 z-10 animate-fade-in">
               <div className="space-y-2">
-                <h3 className="text-2xl font-bold text-white">RTVI Assistant</h3>
-                <p className="text-white/80">Ready for multi-modal conversation</p>
+                <User className="h-16 w-16 mx-auto text-white/60" />
+                <h3 className="text-2xl font-bold text-white">
+                  {videoState.isVideoEnabled ? 'Camera Loading...' : 'Camera Off'}
+                </h3>
+                <p className="text-white/80">
+                  {videoState.isVideoEnabled 
+                    ? 'Connecting to your camera' 
+                    : 'Enable camera to see yourself'
+                  }
+                </p>
               </div>
               
               <div className="flex items-center justify-center gap-6 text-white/60">
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-success rounded-full animate-pulse" />
-                  <span className="text-sm">Voice Ready</span>
+                  <div className={cn(
+                    "w-2 h-2 rounded-full",
+                    !videoState.isMuted ? "bg-success animate-pulse" : "bg-muted"
+                  )} />
+                  <span className="text-sm">
+                    {!videoState.isMuted ? "Mic Ready" : "Mic Muted"}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-success rounded-full animate-pulse" />
-                  <span className="text-sm">Video Ready</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-success rounded-full animate-pulse" />
-                  <span className="text-sm">Files Ready</span>
+                  <div className={cn(
+                    "w-2 h-2 rounded-full",
+                    videoState.isVideoEnabled ? "bg-success animate-pulse" : "bg-muted"
+                  )} />
+                  <span className="text-sm">
+                    {videoState.isVideoEnabled ? "Camera Ready" : "Camera Off"}
+                  </span>
                 </div>
               </div>
             </div>
@@ -140,23 +152,6 @@ export function VideoInterface({
             )}
           </Button>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onScreenShareToggle}
-            className={cn(
-              "glass-panel p-2",
-              videoState.isScreenSharing 
-                ? "text-accent hover:bg-accent/20" 
-                : "text-white hover:bg-white/20"
-            )}
-          >
-            {videoState.isScreenSharing ? (
-              <MonitorSpeaker className="h-4 w-4" />
-            ) : (
-              <MonitorOff className="h-4 w-4" />
-            )}
-          </Button>
 
           <Button
             variant="ghost"
@@ -179,15 +174,15 @@ export function VideoInterface({
 
         {/* Status Indicators */}
         <div className="absolute top-4 left-4 flex gap-2">
-          {videoState.isScreenSharing && (
-            <div className="glass-panel px-2 py-1 text-xs font-medium text-accent-foreground bg-accent/80">
-              Screen Sharing
-            </div>
-          )}
-          
           {videoState.isMuted && (
             <div className="glass-panel px-2 py-1 text-xs font-medium text-destructive-foreground bg-destructive/80">
               Muted
+            </div>
+          )}
+          
+          {!videoState.isVideoEnabled && (
+            <div className="glass-panel px-2 py-1 text-xs font-medium text-muted-foreground bg-muted/80">
+              Camera Off
             </div>
           )}
         </div>
@@ -195,8 +190,13 @@ export function VideoInterface({
         {/* Recording Indicator */}
         <div className="absolute top-4 right-4">
           <div className="flex items-center gap-2 glass-panel px-3 py-1">
-            <div className="w-2 h-2 bg-destructive rounded-full animate-pulse" />
-            <span className="text-xs font-medium text-white">Live</span>
+            <div className={cn(
+              "w-2 h-2 rounded-full",
+              isRecording ? "bg-destructive animate-pulse" : "bg-muted"
+            )} />
+            <span className="text-xs font-medium text-white">
+              {isRecording ? "Recording" : "Ready"}
+            </span>
           </div>
         </div>
       </div>

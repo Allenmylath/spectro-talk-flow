@@ -9,7 +9,7 @@ export interface RTVIConnectionState {
 
 export interface RTVIMessage {
   id: string;
-  type: 'user' | 'bot' | 'system';
+  type: 'user' | 'bot' | 'system' | 'voice';
   content: string;
   timestamp: Date;
   sender?: string;

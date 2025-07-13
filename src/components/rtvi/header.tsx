@@ -2,9 +2,7 @@ import { cn } from "@/lib/utils";
 import { RTVIConnectionState } from "@/types/rtvi";
 import { 
   Zap, 
-  MessageSquare, 
-  Upload, 
-  BarChart3,
+  FileText,
   Settings,
   Power,
   PowerOff
@@ -16,13 +14,9 @@ interface RTVIHeaderProps {
   connectionState: RTVIConnectionState;
   onConnect: () => void;
   onDisconnect: () => void;
-  onToggleChat: () => void;
-  onToggleFiles: () => void;
-  onToggleAnalytics: () => void;
+  onToggleTranscription: () => void;
   onOpenSettings: () => void;
-  isChatOpen?: boolean;
-  isFilesOpen?: boolean;
-  isAnalyticsOpen?: boolean;
+  isTranscriptionOpen?: boolean;
   className?: string;
 }
 
@@ -30,13 +24,9 @@ export function RTVIHeader({
   connectionState,
   onConnect,
   onDisconnect,
-  onToggleChat,
-  onToggleFiles,
-  onToggleAnalytics,
+  onToggleTranscription,
   onOpenSettings,
-  isChatOpen = false,
-  isFilesOpen = false,
-  isAnalyticsOpen = false,
+  isTranscriptionOpen = false,
   className
 }: RTVIHeaderProps) {
   const isConnected = connectionState.status === 'connected';
@@ -67,36 +57,16 @@ export function RTVIHeader({
 
       {/* Controls */}
       <div className="flex items-center gap-2">
-        {/* Panel Toggles */}
+        {/* Panel Toggle */}
         <div className="flex items-center gap-1 mr-4">
           <Button
-            variant={isChatOpen ? "default" : "ghost"}
+            variant={isTranscriptionOpen ? "default" : "ghost"}
             size="sm"
-            onClick={onToggleChat}
+            onClick={onToggleTranscription}
             className="hover-scale"
           >
-            <MessageSquare className="h-4 w-4 mr-2" />
-            Chat
-          </Button>
-          
-          <Button
-            variant={isFilesOpen ? "default" : "ghost"}
-            size="sm"
-            onClick={onToggleFiles}
-            className="hover-scale"
-          >
-            <Upload className="h-4 w-4 mr-2" />
-            Files
-          </Button>
-          
-          <Button
-            variant={isAnalyticsOpen ? "default" : "ghost"}
-            size="sm"
-            onClick={onToggleAnalytics}
-            className="hover-scale"
-          >
-            <BarChart3 className="h-4 w-4 mr-2" />
-            Analytics
+            <FileText className="h-4 w-4 mr-2" />
+            Transcription
           </Button>
         </div>
 
