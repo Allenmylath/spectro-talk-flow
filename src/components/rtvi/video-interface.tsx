@@ -115,7 +115,7 @@ export function VideoInterface({
         )}
 
         {/* Video Controls Overlay */}
-        <div className="video-controls opacity-50 group-hover:opacity-100 transition-all duration-300">
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 bg-black/50 backdrop-blur-sm rounded-lg p-2 opacity-90 hover:opacity-100 transition-opacity duration-200">
           <Button
             variant="ghost"
             size="sm"
