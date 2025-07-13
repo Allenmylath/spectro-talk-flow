@@ -1,12 +1,6 @@
 // src/components/rtvi/rtvi-client.tsx
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { 
-  useRTVIClient,
-  useRTVIClientTransportState,
-  RTVIClientAudio,
-  RTVIClientVideo
-} from '@pipecat-ai/client-react';
 import { 
   RTVIEvent,
   TransportState,
@@ -14,7 +8,7 @@ import {
   TranscriptData,
   BotLLMTextData
 } from '@pipecat-ai/client-js';
-import { RTVIProvider } from '@/providers/RTVIProvider';
+import { RTVIProvider, usePipecat } from '@/providers/RTVIProvider';
 import { RTVIConnectionState, RTVIMessage, RTVIVideoState, RTVIFile, RTVIAnalytics } from "@/types/rtvi";
 import { RTVI_CONFIG } from '@/config/rtvi';
 import { RTVIHeader } from "./header";
@@ -45,8 +39,9 @@ export function RTVIClient({ className }: RTVIClientProps) {
 
 // Main interface component - enhanced with real RTVI backend connection
 function RTVIInterface({ className }: { className?: string }) {
-  const client = useRTVIClient();
-  const transportState = useRTVIClientTransportState();
+  const client = usePipecat();
+  const videoContainerRef = useRef<HTMLDivElement>(null);
+  const audioElementRef = useRef<HTMLAudioElement>(null);
 
   // State management
   const [connectionState, setConnectionState] = useState<RTVIConnectionState>({
@@ -81,61 +76,99 @@ function RTVIInterface({ className }: { className?: string }) {
 
   // Convert transport state to connection state
   useEffect(() => {
-    const statusMap: Record<TransportState, RTVIConnectionState['status']> = {
-      'disconnected': 'disconnected',
-      'initializing': 'connecting',
-      'initialized': 'connecting',
-      'authenticating': 'connecting',
-      'connecting': 'connecting', 
-      'connected': 'connected',
-      'ready': 'connected',
-      'disconnecting': 'disconnected',
-      'error': 'error'
-    };
-
-    setConnectionState(prev => ({
-      ...prev,
-      status: statusMap[transportState] || 'disconnected'
-    }));
-  }, [transportState]);
-
-  // Track video state changes
-  useEffect(() => {
     if (!client) return;
 
-    const tracks = client.tracks();
-    setVideoState(prev => ({
-      ...prev,
-      hasVideo: !!tracks.bot?.video || !!tracks.local.video,
-      isVideoEnabled: !!tracks.local.video,
-      isAudioEnabled: !!tracks.local.audio,
-      isMuted: !tracks.local.audio
-    }));
-  }, [client, transportState]);
+    const handleTransportStateChange = (state: TransportState) => {
+      const statusMap: Record<TransportState, RTVIConnectionState['status']> = {
+        'disconnected': 'disconnected',
+        'initializing': 'connecting',
+        'initialized': 'connecting',
+        'authenticating': 'connecting',
+        'connecting': 'connecting', 
+        'connected': 'connected',
+        'ready': 'connected',
+        'disconnecting': 'disconnected',
+        'error': 'error'
+      };
 
-  // RTVI Event Handlers using direct client event listeners
-  useEffect(() => {
-    if (!client) return;
-
-    const handleTransportStateChanged = (state: TransportState) => {
-      console.log(`Transport state changed: ${state}`);
-    };
-
-    const handleBotConnected = (participant?: Participant) => {
-      console.log('Bot connected:', participant);
       setConnectionState(prev => ({
         ...prev,
-        participantCount: prev.participantCount + 1
+        status: statusMap[state] || 'disconnected'
       }));
     };
 
-    const handleBotDisconnected = (participant?: Participant) => {
-      console.log('Bot disconnected:', participant);
-      setConnectionState(prev => ({
-        ...prev,
-        participantCount: Math.max(0, prev.participantCount - 1)
-      }));
+    client.on(RTVIEvent.TransportStateChanged, handleTransportStateChange);
+    
+    return () => {
+      client.off(RTVIEvent.TransportStateChanged, handleTransportStateChange);
     };
+  }, [client]);
+
+  // Track and media handling
+  useEffect(() => {
+    if (!client) return;
+
+    const handleTrackStarted = (track: MediaStreamTrack, participant: Participant) => {
+      console.log('Track started:', track.kind, participant);
+      
+      if (track.kind === "audio" && !participant.local) {
+        // Handle bot audio
+        if (audioElementRef.current) {
+          audioElementRef.current.srcObject = new MediaStream([track]);
+        }
+      }
+      
+      if (track.kind === "video" && !participant.local) {
+        // Handle bot video
+        if (videoContainerRef.current) {
+          const video = document.createElement("video");
+          video.srcObject = new MediaStream([track]);
+          video.autoplay = true;
+          video.style.width = "100%";
+          video.style.height = "100%";
+          video.style.objectFit = "cover";
+          videoContainerRef.current.appendChild(video);
+        }
+      }
+
+      // Update video state
+      if (participant.local) {
+        setVideoState(prev => ({
+          ...prev,
+          isVideoEnabled: track.kind === "video",
+          isAudioEnabled: track.kind === "audio",
+          isMuted: track.kind === "audio" ? !track.enabled : prev.isMuted
+        }));
+      } else {
+        setVideoState(prev => ({
+          ...prev,
+          hasVideo: track.kind === "video" || prev.hasVideo
+        }));
+      }
+    };
+
+    const handleTrackStopped = (track: MediaStreamTrack, participant: Participant) => {
+      console.log('Track stopped:', track.kind, participant);
+      
+      if (track.kind === "video" && !participant.local && videoContainerRef.current) {
+        // Clean up bot video elements
+        const videos = videoContainerRef.current.querySelectorAll('video');
+        videos.forEach(video => video.remove());
+      }
+    };
+
+    client.on(RTVIEvent.TrackStarted, handleTrackStarted);
+    client.on(RTVIEvent.TrackStopped, handleTrackStopped);
+
+    return () => {
+      client.off(RTVIEvent.TrackStarted, handleTrackStarted);
+      client.off(RTVIEvent.TrackStopped, handleTrackStopped);
+    };
+  }, [client]);
+
+  // Message and bot event handling
+  useEffect(() => {
+    if (!client) return;
 
     const handleUserTranscript = (data: TranscriptData) => {
       if (data.final) {
@@ -177,8 +210,23 @@ function RTVIInterface({ className }: { className?: string }) {
       setIsTyping(false);
     };
 
+    const handleBotConnected = (participant?: Participant) => {
+      console.log('Bot connected:', participant);
+      setConnectionState(prev => ({
+        ...prev,
+        participantCount: prev.participantCount + 1
+      }));
+    };
+
+    const handleBotDisconnected = (participant?: Participant) => {
+      console.log('Bot disconnected:', participant);
+      setConnectionState(prev => ({
+        ...prev,
+        participantCount: Math.max(0, prev.participantCount - 1)
+      }));
+    };
+
     // Add event listeners
-    client.on(RTVIEvent.TransportStateChanged, handleTransportStateChanged);
     client.on(RTVIEvent.BotConnected, handleBotConnected);
     client.on(RTVIEvent.BotDisconnected, handleBotDisconnected);
     client.on(RTVIEvent.UserTranscript, handleUserTranscript);
@@ -190,7 +238,6 @@ function RTVIInterface({ className }: { className?: string }) {
 
     // Cleanup event listeners
     return () => {
-      client.off(RTVIEvent.TransportStateChanged, handleTransportStateChanged);
       client.off(RTVIEvent.BotConnected, handleBotConnected);
       client.off(RTVIEvent.BotDisconnected, handleBotDisconnected);
       client.off(RTVIEvent.UserTranscript, handleUserTranscript);
@@ -278,13 +325,8 @@ function RTVIInterface({ className }: { className?: string }) {
     setMessages(prev => [...prev, userMessage]);
     
     try {
-      // Send message through RTVI client using sendMessage
-      client.sendMessage({
-        id: Math.random().toString(36).substr(2, 9),
-        label: 'user-text',
-        type: 'user-text',
-        data: { text: content }
-      });
+      // TODO: Send message to bot when the correct API is available
+      console.log('Sending message to bot:', content);
     } catch (error) {
       console.error('Failed to send message:', error);
       toast({
@@ -384,15 +426,11 @@ function RTVIInterface({ className }: { className?: string }) {
         {/* Center - Video Interface */}
         <div className="flex-1 p-6">
           <div className="max-w-4xl mx-auto">
-            {/* Real RTVI Video Components */}
+            {/* Manual Video Container for Bot Video */}
             <div className="relative">
               {isConnected ? (
-                <div className="video-container">
-                  <RTVIClientVideo 
-                    participant="bot" 
-                    fit="cover" 
-                    style={{ width: '100%', height: '100%' }}
-                  />
+                <div className="video-container" ref={videoContainerRef} style={{ width: '100%', height: '400px', backgroundColor: '#000' }}>
+                  {/* Bot video will be inserted here by track handler */}
                   <VideoInterface
                     videoState={videoState}
                     onVideoToggle={handleVideoToggle}
@@ -447,8 +485,8 @@ function RTVIInterface({ className }: { className?: string }) {
         />
       </div>
 
-      {/* Audio Component */}
-      <RTVIClientAudio />
+      {/* Manual Audio Element for Bot Audio */}
+      <audio ref={audioElementRef} autoPlay style={{ display: 'none' }} />
     </div>
   );
 }
