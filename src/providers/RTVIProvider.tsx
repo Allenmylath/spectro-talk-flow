@@ -9,13 +9,6 @@ const transport = new DailyTransport();
 
 const client = new PipecatClient({
   transport,
-  params: {
-    baseUrl: RTVI_CONFIG.baseUrl,
-    endpoints: {
-      connect: '/connect',
-    },
-  },
-  config: RTVI_CONFIG.config,
   enableMic: true,
   enableCam: true,
 });

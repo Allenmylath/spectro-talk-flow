@@ -4,7 +4,6 @@ import { cn } from "@/lib/utils";
 import { 
   usePipecatClient,
   usePipecatClientTransportState,
-  usePipecatClientEvent,
   PipecatClientAudio,
   PipecatClientVideo
 } from '@pipecat-ai/client-react';
@@ -17,6 +16,7 @@ import {
 } from '@pipecat-ai/client-js';
 import { RTVIProvider } from '@/providers/RTVIProvider';
 import { RTVIConnectionState, RTVIMessage, RTVIVideoState, RTVIFile, RTVIAnalytics } from "@/types/rtvi";
+import { RTVI_CONFIG } from '@/config/rtvi';
 import { RTVIHeader } from "./header";
 import { VideoInterface } from "./video-interface";
 import { TranscriptionPanel } from "./transcription-panel";
@@ -83,6 +83,10 @@ function RTVIInterface({ className }: { className?: string }) {
   useEffect(() => {
     const statusMap: Record<TransportState, RTVIConnectionState['status']> = {
       'disconnected': 'disconnected',
+      'initializing': 'connecting',
+      'initialized': 'connecting',
+      'authenticating': 'connecting',
+      'authenticated': 'connecting',
       'connecting': 'connecting', 
       'connected': 'connected',
       'ready': 'connected',
@@ -110,39 +114,31 @@ function RTVIInterface({ className }: { className?: string }) {
     }));
   }, [client, transportState]);
 
-  // RTVI Event Handlers
-  usePipecatClientEvent(
-    RTVIEvent.TransportStateChanged,
-    useCallback((state: TransportState) => {
-      console.log(`Transport state changed: ${state}`);
-    }, [])
-  );
+  // RTVI Event Handlers using direct client event listeners
+  useEffect(() => {
+    if (!client) return;
 
-  usePipecatClientEvent(
-    RTVIEvent.BotConnected,
-    useCallback((participant?: Participant) => {
+    const handleTransportStateChanged = (state: TransportState) => {
+      console.log(`Transport state changed: ${state}`);
+    };
+
+    const handleBotConnected = (participant?: Participant) => {
       console.log('Bot connected:', participant);
       setConnectionState(prev => ({
         ...prev,
         participantCount: prev.participantCount + 1
       }));
-    }, [])
-  );
+    };
 
-  usePipecatClientEvent(
-    RTVIEvent.BotDisconnected,
-    useCallback((participant?: Participant) => {
+    const handleBotDisconnected = (participant?: Participant) => {
       console.log('Bot disconnected:', participant);
       setConnectionState(prev => ({
         ...prev,
         participantCount: Math.max(0, prev.participantCount - 1)
       }));
-    }, [])
-  );
+    };
 
-  usePipecatClientEvent(
-    RTVIEvent.UserTranscript,
-    useCallback((data: TranscriptData) => {
+    const handleUserTranscript = (data: TranscriptData) => {
       if (data.final) {
         const userMessage: RTVIMessage = {
           id: `msg-${Date.now()}-user`,
@@ -153,12 +149,9 @@ function RTVIInterface({ className }: { className?: string }) {
         setMessages(prev => [...prev, userMessage]);
         setAnalytics(prev => ({ ...prev, messagesCount: prev.messagesCount + 1 }));
       }
-    }, [])
-  );
+    };
 
-  usePipecatClientEvent(
-    RTVIEvent.BotTranscript,
-    useCallback((data: BotLLMTextData) => {
+    const handleBotTranscript = (data: BotLLMTextData) => {
       const botMessage: RTVIMessage = {
         id: `msg-${Date.now()}-bot`,
         type: 'bot', 
@@ -167,36 +160,48 @@ function RTVIInterface({ className }: { className?: string }) {
       };
       setMessages(prev => [...prev, botMessage]);
       setAnalytics(prev => ({ ...prev, messagesCount: prev.messagesCount + 1 }));
-    }, [])
-  );
+    };
 
-  usePipecatClientEvent(
-    RTVIEvent.UserStartedSpeaking,
-    useCallback(() => {
+    const handleUserStartedSpeaking = () => {
       setIsListening(true);
-    }, [])
-  );
+    };
 
-  usePipecatClientEvent(
-    RTVIEvent.UserStoppedSpeaking,
-    useCallback(() => {
+    const handleUserStoppedSpeaking = () => {
       setIsListening(false);
-    }, [])
-  );
+    };
 
-  usePipecatClientEvent(
-    RTVIEvent.BotLlmStarted,
-    useCallback(() => {
+    const handleBotLlmStarted = () => {
       setIsTyping(true);
-    }, [])
-  );
+    };
 
-  usePipecatClientEvent(
-    RTVIEvent.BotLlmStopped,
-    useCallback(() => {
+    const handleBotLlmStopped = () => {
       setIsTyping(false);
-    }, [])
-  );
+    };
+
+    // Add event listeners
+    client.on(RTVIEvent.TransportStateChanged, handleTransportStateChanged);
+    client.on(RTVIEvent.BotConnected, handleBotConnected);
+    client.on(RTVIEvent.BotDisconnected, handleBotDisconnected);
+    client.on(RTVIEvent.UserTranscript, handleUserTranscript);
+    client.on(RTVIEvent.BotTranscript, handleBotTranscript);
+    client.on(RTVIEvent.UserStartedSpeaking, handleUserStartedSpeaking);
+    client.on(RTVIEvent.UserStoppedSpeaking, handleUserStoppedSpeaking);
+    client.on(RTVIEvent.BotLlmStarted, handleBotLlmStarted);
+    client.on(RTVIEvent.BotLlmStopped, handleBotLlmStopped);
+
+    // Cleanup event listeners
+    return () => {
+      client.off(RTVIEvent.TransportStateChanged, handleTransportStateChanged);
+      client.off(RTVIEvent.BotConnected, handleBotConnected);
+      client.off(RTVIEvent.BotDisconnected, handleBotDisconnected);
+      client.off(RTVIEvent.UserTranscript, handleUserTranscript);
+      client.off(RTVIEvent.BotTranscript, handleBotTranscript);
+      client.off(RTVIEvent.UserStartedSpeaking, handleUserStartedSpeaking);
+      client.off(RTVIEvent.UserStoppedSpeaking, handleUserStoppedSpeaking);
+      client.off(RTVIEvent.BotLlmStarted, handleBotLlmStarted);
+      client.off(RTVIEvent.BotLlmStopped, handleBotLlmStopped);
+    };
+  }, [client]);
 
   // Connection Handlers
   const handleConnect = useCallback(async () => {
@@ -206,7 +211,12 @@ function RTVIInterface({ className }: { className?: string }) {
     }
 
     try {
-      await client.connect();
+      await client.connect({
+        endpoint: RTVI_CONFIG.baseUrl + '/connect',
+        requestData: {
+          // Add any connection request data here
+        }
+      });
       toast({
         title: "Connected",
         description: "Successfully connected to the AI assistant.",
@@ -242,12 +252,8 @@ function RTVIInterface({ className }: { className?: string }) {
     if (!client) return;
     
     try {
-      const tracks = client.tracks();
-      if (tracks.local.video) {
-        await client.disableCamera();
-      } else {
-        await client.enableCamera();
-      }
+      const isEnabled = client.isCamEnabled;
+      client.enableCam(!isEnabled);
     } catch (error) {
       console.error('Video toggle failed:', error);
     }
@@ -257,12 +263,8 @@ function RTVIInterface({ className }: { className?: string }) {
     if (!client) return;
     
     try {
-      const tracks = client.tracks();
-      if (tracks.local.audio) {
-        await client.disableMic();
-      } else {
-        await client.enableMic();
-      }
+      const isEnabled = client.isMicEnabled;
+      client.enableMic(!isEnabled);
     } catch (error) {
       console.error('Audio toggle failed:', error);
     }
@@ -282,8 +284,8 @@ function RTVIInterface({ className }: { className?: string }) {
     setMessages(prev => [...prev, userMessage]);
     
     try {
-      // Send message through RTVI client
-      await client.sendUserMessage(content);
+      // Send message through RTVI client using sendClientMessage
+      client.sendClientMessage('user-text', { text: content });
     } catch (error) {
       console.error('Failed to send message:', error);
       toast({
