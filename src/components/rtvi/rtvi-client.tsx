@@ -1,42 +1,59 @@
-import React, { useState, useCallback, useEffect, useRef } from "react";
+// src/components/rtvi/rtvi-client.tsx
+import React, { useState, useCallback, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { RTVIConnectionState, RTVIMessage, RTVIVideoState } from "@/types/rtvi";
+import { 
+  useRTVIClient,
+  useRTVIClientTransportState,
+  useRTVIClientEvent,
+  RTVIClientAudio,
+  RTVIClientVideo
+} from '@pipecat-ai/client-react';
+import { 
+  RTVIEvent,
+  TransportState,
+  Participant,
+  TranscriptData,
+  BotLLMTextData
+} from '@pipecat-ai/client-js';
+import { RTVIProvider } from '@/providers/RTVIProvider';
+import { RTVIConnectionState, RTVIMessage, RTVIVideoState, RTVIFile, RTVIAnalytics } from "@/types/rtvi";
 import { RTVIHeader } from "./header";
 import { VideoInterface } from "./video-interface";
 import { TranscriptionPanel } from "./transcription-panel";
+import { FileManager } from "./file-manager";
+import { AnalyticsDashboard } from "./analytics-dashboard";
 import { RTVIErrorBoundary } from "./error-boundary";
 import { Toaster } from "@/components/ui/toaster";
 import { toast } from "@/hooks/use-toast";
-import { RTVI_CONFIG } from "@/config/rtvi";
 
 interface RTVIClientProps {
   serverUrl?: string;
   className?: string;
 }
 
-// Real RTVI Client Component - Phase 1 Implementation
-export function RTVIClient({ 
-  serverUrl = RTVI_CONFIG.baseUrl,
-  className 
-}: RTVIClientProps) {
+// Real RTVI Client Component - Connected to Pipecat
+export function RTVIClient({ className }: RTVIClientProps) {
   return (
-    <RTVIErrorBoundary>
-      <RTVIInterface className={className} serverUrl={serverUrl} />
-      <Toaster />
-    </RTVIErrorBoundary>
+    <RTVIProvider>
+      <RTVIErrorBoundary>
+        <RTVIInterface className={className} />
+        <Toaster />
+      </RTVIErrorBoundary>
+    </RTVIProvider>
   );
 }
 
-// Main interface component - enhanced with RTVI backend connection
-function RTVIInterface({ className, serverUrl }: { className?: string; serverUrl: string }) {
-  const rtviClientRef = useRef<any>(null);
-  // Connection State
+// Main interface component - enhanced with real RTVI backend connection
+function RTVIInterface({ className }: { className?: string }) {
+  const client = useRTVIClient();
+  const transportState = useRTVIClientTransportState();
+
+  // State management
   const [connectionState, setConnectionState] = useState<RTVIConnectionState>({
     status: 'disconnected',
     participantCount: 0
   });
 
-  // Video State
   const [videoState, setVideoState] = useState<RTVIVideoState>({
     isVideoEnabled: true,
     isAudioEnabled: true,
@@ -45,148 +62,228 @@ function RTVIInterface({ className, serverUrl }: { className?: string; serverUrl
     hasVideo: false
   });
 
-  // UI State
   const [isTranscriptionOpen, setIsTranscriptionOpen] = useState(false);
+  const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
+  const [isFileManagerOpen, setIsFileManagerOpen] = useState(false);
+  
   const [isTyping, setIsTyping] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
-
-  // Data State
+  
   const [messages, setMessages] = useState<RTVIMessage[]>([]);
+  const [files, setFiles] = useState<RTVIFile[]>([]);
+  const [analytics, setAnalytics] = useState<RTVIAnalytics>({
+    messagesCount: 0,
+    filesProcessed: 0,
+    connectionDuration: 0,
+    averageResponseTime: 0,
+    lastUpdated: new Date()
+  });
 
-  // Initialize RTVI client connection
+  // Convert transport state to connection state
   useEffect(() => {
-    console.log('RTVI Client initialized with backend URL:', serverUrl);
-    // TODO: Initialize real Pipecat client when API is ready
-    rtviClientRef.current = { 
-      connected: false,
-      baseUrl: serverUrl 
+    const statusMap: Record<TransportState, RTVIConnectionState['status']> = {
+      'disconnected': 'disconnected',
+      'connecting': 'connecting', 
+      'connected': 'connected',
+      'ready': 'connected',
+      'disconnecting': 'disconnected',
+      'error': 'error'
     };
-  }, [serverUrl]);
+
+    setConnectionState(prev => ({
+      ...prev,
+      status: statusMap[transportState] || 'disconnected'
+    }));
+  }, [transportState]);
+
+  // Track video state changes
+  useEffect(() => {
+    if (!client) return;
+
+    const tracks = client.tracks();
+    setVideoState(prev => ({
+      ...prev,
+      hasVideo: !!tracks.bot?.video || !!tracks.local.video,
+      isVideoEnabled: !!tracks.local.video,
+      isAudioEnabled: !!tracks.local.audio,
+      isMuted: !tracks.local.audio
+    }));
+  }, [client, transportState]);
+
+  // RTVI Event Handlers
+  useRTVIClientEvent(
+    RTVIEvent.TransportStateChanged,
+    useCallback((state: TransportState) => {
+      console.log(`Transport state changed: ${state}`);
+    }, [])
+  );
+
+  useRTVIClientEvent(
+    RTVIEvent.BotConnected,
+    useCallback((participant?: Participant) => {
+      console.log('Bot connected:', participant);
+      setConnectionState(prev => ({
+        ...prev,
+        participantCount: prev.participantCount + 1
+      }));
+    }, [])
+  );
+
+  useRTVIClientEvent(
+    RTVIEvent.BotDisconnected,
+    useCallback((participant?: Participant) => {
+      console.log('Bot disconnected:', participant);
+      setConnectionState(prev => ({
+        ...prev,
+        participantCount: Math.max(0, prev.participantCount - 1)
+      }));
+    }, [])
+  );
+
+  useRTVIClientEvent(
+    RTVIEvent.UserTranscript,
+    useCallback((data: TranscriptData) => {
+      if (data.final) {
+        const userMessage: RTVIMessage = {
+          id: `msg-${Date.now()}-user`,
+          type: 'user',
+          content: data.text,
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, userMessage]);
+        setAnalytics(prev => ({ ...prev, messagesCount: prev.messagesCount + 1 }));
+      }
+    }, [])
+  );
+
+  useRTVIClientEvent(
+    RTVIEvent.BotTranscript,
+    useCallback((data: BotLLMTextData) => {
+      const botMessage: RTVIMessage = {
+        id: `msg-${Date.now()}-bot`,
+        type: 'bot', 
+        content: data.text,
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, botMessage]);
+      setAnalytics(prev => ({ ...prev, messagesCount: prev.messagesCount + 1 }));
+    }, [])
+  );
+
+  useRTVIClientEvent(
+    RTVIEvent.UserStartedSpeaking,
+    useCallback(() => {
+      setIsListening(true);
+    }, [])
+  );
+
+  useRTVIClientEvent(
+    RTVIEvent.UserStoppedSpeaking,
+    useCallback(() => {
+      setIsListening(false);
+    }, [])
+  );
+
+  useRTVIClientEvent(
+    RTVIEvent.BotLLMStarted,
+    useCallback(() => {
+      setIsTyping(true);
+    }, [])
+  );
+
+  useRTVIClientEvent(
+    RTVIEvent.BotLLMStopped,
+    useCallback(() => {
+      setIsTyping(false);
+    }, [])
+  );
 
   // Connection Handlers
   const handleConnect = useCallback(async () => {
-    const client = rtviClientRef.current;
-    if (!client) return;
-    
-    setConnectionState(prev => ({ ...prev, status: 'connecting' }));
-    
+    if (!client) {
+      console.error('RTVI client is not initialized');
+      return;
+    }
+
     try {
       await client.connect();
+      toast({
+        title: "Connected",
+        description: "Successfully connected to the AI assistant.",
+      });
     } catch (error) {
-      console.error('Connection failed:', error);
-      setConnectionState({
-        status: 'error',
-        participantCount: 0,
-        error: error instanceof Error ? error.message : 'Failed to connect to server'
+      console.error('Connection error:', error);
+      toast({
+        title: "Connection Failed",
+        description: "Could not connect to the AI assistant.",
+        variant: "destructive"
       });
     }
-  }, []);
+  }, [client]);
 
   const handleDisconnect = useCallback(async () => {
-    const client = rtviClientRef.current;
+    if (!client) return;
+
+    try {
+      await client.disconnect();
+      setMessages([]);
+      setFiles([]);
+      toast({
+        title: "Disconnected",
+        description: "Disconnected from the AI assistant.",
+      });
+    } catch (error) {
+      console.error('Disconnection error:', error);
+    }
+  }, [client]);
+
+  // Video/Audio Controls
+  const handleVideoToggle = useCallback(async () => {
     if (!client) return;
     
     try {
-      await client.disconnect();
-    } catch (error) {
-      console.error('Disconnection failed:', error);
-    }
-  }, []);
-
-  // Video Handlers
-  const handleVideoToggle = useCallback(async () => {
-    setVideoState(prev => ({ ...prev, isVideoEnabled: !prev.isVideoEnabled }));
-    
-    try {
-      // Basic video toggle - will be enhanced with actual transport integration
-      const client = rtviClientRef.current;
-      if (client && client.transport) {
-        // Toggle camera via transport if available
-        console.log('Toggling video:', videoState.isVideoEnabled);
+      const tracks = client.tracks();
+      if (tracks.local.video) {
+        await client.disableCamera();
+      } else {
+        await client.enableCamera();
       }
     } catch (error) {
       console.error('Video toggle failed:', error);
     }
-  }, [videoState.isVideoEnabled]);
+  }, [client]);
 
   const handleAudioToggle = useCallback(async () => {
-    setVideoState(prev => ({ ...prev, isMuted: !prev.isMuted }));
+    if (!client) return;
     
     try {
-      // Basic audio toggle - will be enhanced with actual transport integration
-      const client = rtviClientRef.current;
-      if (client && client.transport) {
-        // Toggle microphone via transport if available
-        console.log('Toggling audio:', videoState.isMuted);
+      const tracks = client.tracks();
+      if (tracks.local.audio) {
+        await client.disableMic();
+      } else {
+        await client.enableMic();
       }
     } catch (error) {
       console.error('Audio toggle failed:', error);
     }
-  }, [videoState.isMuted]);
+  }, [client]);
 
-  // Recording toggle for user video
-  const handleRecordingToggle = useCallback(async () => {
-    const newRecordingState = !isRecording;
-    setIsRecording(newRecordingState);
-    
-    try {
-      const client = rtviClientRef.current;
-      if (client && client.transport) {
-        if (newRecordingState) {
-          console.log('Starting recording');
-          toast({
-            title: "Recording Started",
-            description: "Your video is now being recorded.",
-          });
-        } else {
-          console.log('Stopping recording');
-          toast({
-            title: "Recording Stopped",
-            description: "Video recording has been stopped.",
-          });
-        }
-      }
-    } catch (error) {
-      console.error('Recording toggle failed:', error);
-      // Revert state on error
-      setIsRecording(!newRecordingState);
-    }
-  }, [isRecording]);
-
-  // Chat Handlers
+  // Chat Handler
   const handleSendMessage = useCallback(async (content: string) => {
-    const client = rtviClientRef.current;
     if (!client) return;
-    
+
     const userMessage: RTVIMessage = {
-      id: `msg-${Date.now()}`,
+      id: `msg-${Date.now()}-user-typed`,
       type: 'user',
       content,
       timestamp: new Date()
     };
-    
+
     setMessages(prev => [...prev, userMessage]);
     
     try {
-      // Send message via Pipecat client
-      if (client.sendUserMessage) {
-        await client.sendUserMessage(content);
-      } else {
-        console.log('Sending message:', content);
-      }
-      
-      // Simulate bot response for now
-      setTimeout(() => {
-        const botMessage: RTVIMessage = {
-          id: `msg-${Date.now()}-bot`,
-          type: 'bot',
-          content: `I received your message: "${content}". I'm processing this through the RTVI backend.`,
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, botMessage]);
-      }, 1000);
-      
+      // Send message through RTVI client
+      await client.sendUserMessage(content);
     } catch (error) {
       console.error('Failed to send message:', error);
       toast({
@@ -195,8 +292,75 @@ function RTVIInterface({ className, serverUrl }: { className?: string; serverUrl
         variant: "destructive"
       });
     }
+  }, [client]);
+
+  // File Handlers
+  const handleFileUpload = useCallback(async (uploadFiles: File[]) => {
+    const newFiles: RTVIFile[] = uploadFiles.map(file => ({
+      id: `file-${Date.now()}-${Math.random()}`,
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      uploadProgress: 0
+    }));
+
+    setFiles(prev => [...prev, ...newFiles]);
+
+    // Simulate file upload progress
+    for (const rtviFile of newFiles) {
+      try {
+        // Update progress
+        for (let progress = 0; progress <= 100; progress += 20) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+          setFiles(prev => prev.map(f => 
+            f.id === rtviFile.id ? { ...f, uploadProgress: progress } : f
+          ));
+        }
+
+        // Mark as processed
+        setFiles(prev => prev.map(f => 
+          f.id === rtviFile.id 
+            ? { 
+                ...f, 
+                processedAt: new Date(), 
+                analysisResult: `AI analysis of ${f.name}: This file contains valuable information.`,
+                uploadProgress: undefined 
+              } 
+            : f
+        ));
+
+        setAnalytics(prev => ({ ...prev, filesProcessed: prev.filesProcessed + 1 }));
+
+      } catch (error) {
+        setFiles(prev => prev.map(f => 
+          f.id === rtviFile.id 
+            ? { ...f, error: 'Upload failed', uploadProgress: undefined } 
+            : f
+        ));
+      }
+    }
   }, []);
 
+  const handleFileDelete = useCallback((fileId: string) => {
+    setFiles(prev => prev.filter(f => f.id !== fileId));
+  }, []);
+
+  const handleFileAnalyze = useCallback((fileId: string) => {
+    toast({
+      title: "File Analysis",
+      description: "File analysis results would be downloaded here.",
+    });
+  }, []);
+
+  const handleRefreshAnalytics = useCallback(() => {
+    setAnalytics(prev => ({
+      ...prev,
+      lastUpdated: new Date(),
+      connectionDuration: prev.connectionDuration + 1
+    }));
+  }, []);
+
+  const isConnected = connectionState.status === 'connected';
 
   return (
     <div className={cn("min-h-screen bg-background flex flex-col", className)}>
@@ -206,8 +370,12 @@ function RTVIInterface({ className, serverUrl }: { className?: string; serverUrl
         onConnect={handleConnect}
         onDisconnect={handleDisconnect}
         onToggleTranscription={() => setIsTranscriptionOpen(!isTranscriptionOpen)}
+        onToggleAnalytics={() => setIsAnalyticsOpen(!isAnalyticsOpen)}
+        onToggleFileManager={() => setIsFileManagerOpen(!isFileManagerOpen)}
         onOpenSettings={() => toast({ title: "Settings", description: "Settings panel coming soon!" })}
         isTranscriptionOpen={isTranscriptionOpen}
+        isAnalyticsOpen={isAnalyticsOpen}
+        isFileManagerOpen={isFileManagerOpen}
       />
 
       {/* Main Content */}
@@ -215,14 +383,55 @@ function RTVIInterface({ className, serverUrl }: { className?: string; serverUrl
         {/* Center - Video Interface */}
         <div className="flex-1 p-6">
           <div className="max-w-4xl mx-auto">
-            <VideoInterface
-              videoState={videoState}
-              onVideoToggle={handleVideoToggle}
-              onAudioToggle={handleAudioToggle}
-              onSettingsClick={() => toast({ title: "Video Settings", description: "Video settings coming soon!" })}
-              isRecording={isRecording}
-              className="w-full max-w-3xl mx-auto"
-            />
+            {/* Real RTVI Video Components */}
+            <div className="relative">
+              {isConnected ? (
+                <div className="video-container">
+                  <RTVIClientVideo 
+                    participant="bot" 
+                    fit="cover" 
+                    style={{ width: '100%', height: '100%' }}
+                  />
+                  <VideoInterface
+                    videoState={videoState}
+                    onVideoToggle={handleVideoToggle}
+                    onAudioToggle={handleAudioToggle}
+                    onSettingsClick={() => toast({ title: "Video Settings", description: "Video settings panel coming soon!" })}
+                    className="absolute inset-0"
+                  />
+                </div>
+              ) : (
+                <VideoInterface
+                  videoState={videoState}
+                  onVideoToggle={handleVideoToggle}
+                  onAudioToggle={handleAudioToggle}
+                  onSettingsClick={() => toast({ title: "Video Settings", description: "Video settings panel coming soon!" })}
+                  className="w-full max-w-3xl mx-auto"
+                />
+              )}
+            </div>
+
+            {/* Analytics Dashboard */}
+            {isAnalyticsOpen && (
+              <div className="mt-6">
+                <AnalyticsDashboard
+                  analytics={analytics}
+                  onRefresh={handleRefreshAnalytics}
+                />
+              </div>
+            )}
+
+            {/* File Manager */}
+            {isFileManagerOpen && (
+              <div className="mt-6">
+                <FileManager
+                  files={files}
+                  onFileUpload={handleFileUpload}
+                  onFileDelete={handleFileDelete}
+                  onFileAnalyze={handleFileAnalyze}
+                />
+              </div>
+            )}
           </div>
         </div>
 
@@ -237,6 +446,8 @@ function RTVIInterface({ className, serverUrl }: { className?: string; serverUrl
         />
       </div>
 
+      {/* Audio Component */}
+      <RTVIClientAudio />
     </div>
   );
 }
