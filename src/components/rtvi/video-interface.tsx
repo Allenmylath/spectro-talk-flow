@@ -68,7 +68,7 @@ export function VideoInterface({
           />
         ) : (
           <div 
-            className="w-full h-full bg-gradient-mesh flex items-center justify-center relative overflow-hidden"
+            className="w-full h-full bg-background-secondary flex items-center justify-center relative overflow-hidden"
             style={{
               backgroundImage: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url(${aiAvatarHero})`,
               backgroundSize: 'cover',

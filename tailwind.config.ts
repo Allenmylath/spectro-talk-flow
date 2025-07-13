@@ -24,12 +24,11 @@ export default {
 				ring: 'hsl(var(--ring))',
 				background: {
 					DEFAULT: 'hsl(var(--background))',
-					secondary: 'hsl(var(--background-secondary))',
-					glass: 'hsl(var(--background-glass))'
+					secondary: 'hsl(var(--background-secondary))'
 				},
 				foreground: 'hsl(var(--foreground))',
 				
-				// Modern Primary System
+				// Standard colors using HSL
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
 					light: 'hsl(var(--primary-light))',
@@ -37,7 +36,6 @@ export default {
 					foreground: 'hsl(var(--primary-foreground))'
 				},
 				
-				// Enhanced Secondary
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
 					light: 'hsl(var(--secondary-light))',
@@ -45,7 +43,6 @@ export default {
 					foreground: 'hsl(var(--secondary-foreground))'
 				},
 				
-				// Accent Colors
 				accent: {
 					DEFAULT: 'hsl(var(--accent))',
 					light: 'hsl(var(--accent-light))',
@@ -53,7 +50,7 @@ export default {
 					foreground: 'hsl(var(--accent-foreground))'
 				},
 				
-				// Status Colors
+				// Status colors
 				success: {
 					DEFAULT: 'hsl(var(--success))',
 					light: 'hsl(var(--success-light))'
@@ -68,7 +65,7 @@ export default {
 					foreground: 'hsl(var(--primary-foreground))'
 				},
 				
-				// Neutrals
+				// Neutral colors
 				muted: {
 					DEFAULT: 'hsl(var(--muted))',
 					foreground: 'hsl(var(--muted-foreground))'
@@ -77,15 +74,12 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				
-				// Glass Effects
-				glass: {
-					light: 'hsl(var(--glass-light))',
-					medium: 'hsl(var(--glass-medium))',
-					strong: 'hsl(var(--glass-strong))'
+				popover: {
+					DEFAULT: 'hsl(var(--popover))',
+					foreground: 'hsl(var(--popover-foreground))'
 				},
 				
-				// AI Interface Specific
+				// AI Interface specific
 				ai: {
 					indicator: 'hsl(var(--ai-indicator))',
 					user: 'hsl(var(--user-message))',
@@ -95,42 +89,18 @@ export default {
 				}
 			},
 			
-			// Extended Gradients
-			backgroundImage: {
-				'gradient-primary': 'var(--gradient-primary)',
-				'gradient-secondary': 'var(--gradient-secondary)',
-				'gradient-accent': 'var(--gradient-accent)',
-				'gradient-glass': 'var(--gradient-glass)',
-				'gradient-mesh': 'var(--gradient-mesh)'
-			},
-			
-			// Enhanced Shadows
+			// Enhanced shadows
 			boxShadow: {
-				'glow': 'var(--shadow-glow)',
-				'glow-accent': 'var(--shadow-glow-accent)',
-				'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
-				'elegant': '0 10px 30px -10px hsl(var(--primary) / 0.3)'
+				'sm': '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+				'md': '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+				'lg': '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+				'xl': '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
 			},
 			
-			// Backdrop Blur for Glass Effects
-			backdropBlur: {
-				xs: '2px',
-				sm: '4px',
-				md: '8px',
-				lg: '12px',
-				xl: '16px'
-			},
-			
-			// Font Family
+			// Font family
 			fontFamily: {
 				body: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
 				heading: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif']
-			},
-			
-			// Enhanced Transitions
-			transitionTimingFunction: {
-				'smooth': 'cubic-bezier(0.4, 0, 0.2, 1)',
-				'bounce-subtle': 'cubic-bezier(0.68, -0.55, 0.265, 1.55)'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

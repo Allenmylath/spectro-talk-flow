@@ -50,11 +50,11 @@ export function RTVIHeader({
       {/* Logo and Branding */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
             <Zap className="h-5 w-5 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-gradient-primary">RTVI Client</h1>
+            <h1 className="text-xl font-bold text-primary">RTVI Client</h1>
             <p className="text-xs text-muted-foreground">Real-Time Voice Intelligence</p>
           </div>
         </div>
@@ -127,7 +127,7 @@ export function RTVIHeader({
             size="sm"
             onClick={onConnect}
             disabled={isConnecting}
-            className="btn-gradient-primary ml-2"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 ml-2"
           >
             <Power className="h-4 w-4 mr-2" />
             {isConnecting ? 'Connecting...' : 'Connect'}

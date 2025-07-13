@@ -8,115 +8,89 @@
 
 @layer base {
   :root {
-    /* Modern Background System */
-    --background: 245 247 250;
-    --background-secondary: 248 250 252;
-    --background-glass: 255 255 255 / 0.7;
-    --foreground: 15 23 42;
+    /* Basic Background System - All HSL */
+    --background: 0 0% 100%;
+    --background-secondary: 210 20% 98%;
+    --background-glass: 0 0% 100%;
+    --foreground: 222 84% 5%;
     
-    /* Glass Effect Overlays */
-    --glass-light: 255 255 255 / 0.1;
-    --glass-medium: 255 255 255 / 0.2;
-    --glass-strong: 255 255 255 / 0.4;
+    /* Glass Effect Overlays - HSL with alpha */
+    --glass-light: 0 0% 100%;
+    --glass-medium: 0 0% 100%;
+    --glass-strong: 0 0% 100%;
     
-    /* Modern Primary - Blue-Purple Gradient System */
-    --primary: 236 72 153;
-    --primary-light: 244 114 182;
-    --primary-dark: 219 39 119;
-    --primary-foreground: 255 255 255;
+    /* Modern Primary - Pink/Purple System */
+    --primary: 336 75% 40%;
+    --primary-light: 336 75% 50%;
+    --primary-dark: 336 75% 30%;
+    --primary-foreground: 0 0% 100%;
     
-    /* Secondary - Sophisticated Purple */
-    --secondary: 139 92 246;
-    --secondary-light: 167 139 250;
-    --secondary-dark: 124 58 237;
-    --secondary-foreground: 255 255 255;
+    /* Secondary - Blue System */
+    --secondary: 221 83% 53%;
+    --secondary-light: 221 83% 63%;
+    --secondary-dark: 221 83% 43%;
+    --secondary-foreground: 0 0% 100%;
     
-    /* Accent - Electric Blue */
-    --accent: 59 130 246;
-    --accent-light: 96 165 250;
-    --accent-dark: 37 99 235;
-    --accent-foreground: 255 255 255;
+    /* Accent - Purple System */
+    --accent: 262 83% 58%;
+    --accent-light: 262 83% 68%;
+    --accent-dark: 262 83% 48%;
+    --accent-foreground: 0 0% 100%;
     
-    /* Status Colors */
-    --success: 34 197 94;
-    --success-light: 74 222 128;
-    --warning: 245 158 11;
-    --warning-light: 251 191 36;
-    --destructive: 239 68 68;
-    --destructive-light: 248 113 113;
+    /* Status Colors - All HSL */
+    --success: 142 76% 36%;
+    --success-light: 142 76% 46%;
+    --warning: 38 92% 50%;
+    --warning-light: 38 92% 60%;
+    --destructive: 0 84% 60%;
+    --destructive-light: 0 84% 70%;
     
-    /* Neutral Palette */
-    --muted: 241 245 249;
-    --muted-foreground: 100 116 139;
-    --card: 255 255 255;
-    --card-foreground: 15 23 42;
-    --border: 226 232 240;
-    --input: 241 245 249;
-    --ring: 236 72 153;
+    /* Neutral Palette - All HSL */
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 84% 5%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 336 75% 40%;
     
-    /* AI Interface Specific */
-    --ai-indicator: 34 197 94;
-    --user-message: 59 130 246;
-    --bot-message: 139 92 246;
-    --connection-active: 34 197 94;
-    --connection-inactive: 156 163 175;
+    /* Popover colors */
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 84% 5%;
     
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(236 72% 53%), hsl(219 39% 59%));
-    --gradient-secondary: linear-gradient(135deg, hsl(139 92% 76%), hsl(124 58% 67%));
-    --gradient-accent: linear-gradient(135deg, hsl(59 130% 76%), hsl(37 99% 65%));
-    --gradient-glass: linear-gradient(135deg, hsl(var(--glass-light)), hsl(var(--glass-medium)));
-    --gradient-mesh: linear-gradient(135deg, hsl(236 72% 53% / 0.1), hsl(139 92% 76% / 0.1), hsl(59 130% 76% / 0.1));
-    
-    /* Shadows for Depth */
-    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.05);
-    --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.1), 0 2px 4px -2px hsl(0 0% 0% / 0.1);
-    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.1), 0 4px 6px -4px hsl(0 0% 0% / 0.1);
-    --shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.1), 0 8px 10px -6px hsl(0 0% 0% / 0.1);
-    --shadow-glow: 0 0 20px hsl(236 72% 53% / 0.3);
-    --shadow-glow-accent: 0 0 20px hsl(59 130% 76% / 0.3);
-    
-    /* Animation & Transitions */
-    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+    /* AI Interface Specific - All HSL */
+    --ai-indicator: 142 76% 36%;
+    --user-message: 221 83% 53%;
+    --bot-message: 262 83% 58%;
+    --connection-active: 142 76% 36%;
+    --connection-inactive: 215 16% 47%;
     
     --radius: 0.75rem;
-    --radius-sm: 0.5rem;
-    --radius-lg: 1rem;
-    --radius-xl: 1.5rem;
   }
 
   .dark {
-    /* Dark Mode - Professional Dark Theme */
-    --background: 3 7 18;
-    --background-secondary: 7 11 22;
-    --background-glass: 15 23 42 / 0.7;
-    --foreground: 248 250 252;
+    /* Dark Mode - All HSL */
+    --background: 222 84% 5%;
+    --background-secondary: 215 28% 17%;
+    --background-glass: 222 84% 5%;
+    --foreground: 210 40% 98%;
     
-    /* Dark Glass Effects */
-    --glass-light: 255 255 255 / 0.05;
-    --glass-medium: 255 255 255 / 0.1;
-    --glass-strong: 255 255 255 / 0.15;
+    /* Dark Glass Effects - HSL */
+    --glass-light: 0 0% 100%;
+    --glass-medium: 0 0% 100%;
+    --glass-strong: 0 0% 100%;
     
-    /* Dark Mode Colors */
-    --card: 15 23 42;
-    --card-foreground: 248 250 252;
-    --muted: 30 41 59;
-    --muted-foreground: 148 163 184;
-    --border: 30 41 59;
-    --input: 30 41 59;
+    /* Dark Mode Colors - Keep primary colors same for consistency */
+    --card: 222 84% 5%;
+    --card-foreground: 210 40% 98%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
     
-    /* Enhanced Gradients for Dark Mode */
-    --gradient-primary: linear-gradient(135deg, hsl(236 72% 63%), hsl(219 39% 69%));
-    --gradient-secondary: linear-gradient(135deg, hsl(139 92% 66%), hsl(124 58% 77%));
-    --gradient-accent: linear-gradient(135deg, hsl(59 130% 66%), hsl(37 99% 75%));
-    --gradient-glass: linear-gradient(135deg, hsl(var(--glass-light)), hsl(var(--glass-medium)));
-    --gradient-mesh: linear-gradient(135deg, hsl(236 72% 63% / 0.1), hsl(139 92% 66% / 0.1), hsl(59 130% 66% / 0.1));
-    
-    /* Enhanced Glows for Dark Mode */
-    --shadow-glow: 0 0 30px hsl(236 72% 63% / 0.4);
-    --shadow-glow-accent: 0 0 30px hsl(59 130% 66% / 0.4);
+    /* Popover dark mode */
+    --popover: 222 84% 5%;
+    --popover-foreground: 210 40% 98%;
   }
   
   * {
@@ -137,20 +111,11 @@
 @layer components {
   /* Glass Effect Components */
   .glass-panel {
-    @apply bg-glass-light backdrop-blur-md border border-glass-medium rounded-xl;
+    @apply bg-card/90 backdrop-blur-sm border border-border rounded-xl shadow-md;
   }
   
   .glass-card {
-    @apply bg-card/80 backdrop-blur-md border border-border/50 rounded-lg shadow-glass;
-  }
-  
-  /* Gradient Buttons */
-  .btn-gradient-primary {
-    @apply bg-gradient-primary text-primary-foreground shadow-lg hover:shadow-glow transition-all duration-300;
-  }
-  
-  .btn-gradient-secondary {
-    @apply bg-gradient-secondary text-secondary-foreground shadow-lg hover:shadow-glow-accent transition-all duration-300;
+    @apply bg-card backdrop-blur-sm border border-border rounded-lg shadow-md;
   }
   
   /* Connection Status Indicators */
@@ -172,25 +137,21 @@
   
   /* Message Bubbles */
   .message-bubble-user {
-    @apply bg-ai-user text-white rounded-2xl rounded-br-md px-4 py-3 shadow-md max-w-xs ml-auto;
+    @apply bg-primary text-primary-foreground rounded-2xl rounded-br-md px-4 py-3 shadow-md max-w-xs ml-auto;
   }
   
   .message-bubble-bot {
-    @apply bg-ai-bot text-white rounded-2xl rounded-bl-md px-4 py-3 shadow-md max-w-xs mr-auto;
+    @apply bg-secondary text-secondary-foreground rounded-2xl rounded-bl-md px-4 py-3 shadow-md max-w-xs mr-auto;
   }
   
   /* Hover Animations */
   .hover-scale {
-    @apply transition-transform duration-300 hover:scale-105;
-  }
-  
-  .hover-glow {
-    @apply transition-all duration-300 hover:shadow-glow;
+    @apply transition-transform duration-200 hover:scale-105;
   }
   
   /* File Upload Zone */
   .upload-zone {
-    @apply border-2 border-dashed border-border rounded-xl p-8 text-center transition-all duration-300;
+    @apply border-2 border-dashed border-border rounded-xl p-8 text-center transition-all duration-300 bg-muted/30;
   }
   
   .upload-zone.dragover {
@@ -203,7 +164,7 @@
   }
   
   .video-controls {
-    @apply absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 bg-black/50 backdrop-blur-sm rounded-full px-4 py-2;
+    @apply absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 bg-black/70 backdrop-blur-sm rounded-full px-4 py-2;
   }
 }
 
@@ -219,20 +180,6 @@
   
   .animate-pulse-glow {
     animation: pulseGlow 2s ease-in-out infinite;
-  }
-  
-  /* Text Gradients */
-  .text-gradient-primary {
-    @apply bg-gradient-primary bg-clip-text text-transparent;
-  }
-  
-  .text-gradient-secondary {
-    @apply bg-gradient-secondary bg-clip-text text-transparent;
-  }
-  
-  /* Mesh Background */
-  .bg-mesh {
-    @apply bg-gradient-mesh;
   }
 }
 

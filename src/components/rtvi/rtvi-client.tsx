@@ -271,7 +271,7 @@ export function RTVIClient({
   }, [connectionState.status]);
 
   return (
-    <div className={cn("min-h-screen bg-mesh flex flex-col", className)}>
+    <div className={cn("min-h-screen bg-background flex flex-col", className)}>
       {/* Header */}
       <RTVIHeader
         connectionState={connectionState}
