@@ -1,18 +1,26 @@
 // src/providers/RTVIProvider.tsx
 import { type PropsWithChildren } from 'react';
-import { PipecatClient } from '@pipecat-ai/client-js';
+import { RTVIClient } from '@pipecat-ai/client-js';
 import { DailyTransport } from '@pipecat-ai/daily-transport';
-import { PipecatClientProvider } from '@pipecat-ai/client-react';
+import { RTVIClientProvider } from '@pipecat-ai/client-react';
 import { RTVI_CONFIG } from '@/config/rtvi';
 
 const transport = new DailyTransport();
 
-const client = new PipecatClient({
+const client = new RTVIClient({
   transport,
+  params: {
+    baseUrl: "wss://api.pipecat.ai/v1/rtvi",
+    services: {
+      stt: "deepgram",
+      llm: "openai", 
+      tts: "cartesia"
+    }
+  },
   enableMic: true,
   enableCam: true,
 });
 
 export function RTVIProvider({ children }: PropsWithChildren) {
-  return <PipecatClientProvider client={client}>{children}</PipecatClientProvider>;
+  return <RTVIClientProvider client={client}>{children}</RTVIClientProvider>;
 }

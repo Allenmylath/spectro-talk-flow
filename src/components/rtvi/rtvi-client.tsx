@@ -2,10 +2,10 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { 
-  usePipecatClient,
-  usePipecatClientTransportState,
-  PipecatClientAudio,
-  PipecatClientVideo
+  useRTVIClient,
+  useRTVIClientTransportState,
+  RTVIClientAudio,
+  RTVIClientVideo
 } from '@pipecat-ai/client-react';
 import { 
   RTVIEvent,
@@ -45,8 +45,8 @@ export function RTVIClient({ className }: RTVIClientProps) {
 
 // Main interface component - enhanced with real RTVI backend connection
 function RTVIInterface({ className }: { className?: string }) {
-  const client = usePipecatClient();
-  const transportState = usePipecatClientTransportState();
+  const client = useRTVIClient();
+  const transportState = useRTVIClientTransportState();
 
   // State management
   const [connectionState, setConnectionState] = useState<RTVIConnectionState>({
@@ -86,7 +86,6 @@ function RTVIInterface({ className }: { className?: string }) {
       'initializing': 'connecting',
       'initialized': 'connecting',
       'authenticating': 'connecting',
-      'authenticated': 'connecting',
       'connecting': 'connecting', 
       'connected': 'connected',
       'ready': 'connected',
@@ -211,12 +210,7 @@ function RTVIInterface({ className }: { className?: string }) {
     }
 
     try {
-      await client.connect({
-        endpoint: RTVI_CONFIG.baseUrl + '/connect',
-        requestData: {
-          // Add any connection request data here
-        }
-      });
+      await client.connect();
       toast({
         title: "Connected",
         description: "Successfully connected to the AI assistant.",
@@ -284,8 +278,13 @@ function RTVIInterface({ className }: { className?: string }) {
     setMessages(prev => [...prev, userMessage]);
     
     try {
-      // Send message through RTVI client using sendClientMessage
-      client.sendClientMessage('user-text', { text: content });
+      // Send message through RTVI client using sendMessage
+      client.sendMessage({
+        id: Math.random().toString(36).substr(2, 9),
+        label: 'user-text',
+        type: 'user-text',
+        data: { text: content }
+      });
     } catch (error) {
       console.error('Failed to send message:', error);
       toast({
@@ -389,7 +388,7 @@ function RTVIInterface({ className }: { className?: string }) {
             <div className="relative">
               {isConnected ? (
                 <div className="video-container">
-                  <PipecatClientVideo 
+                  <RTVIClientVideo 
                     participant="bot" 
                     fit="cover" 
                     style={{ width: '100%', height: '100%' }}
@@ -449,7 +448,7 @@ function RTVIInterface({ className }: { className?: string }) {
       </div>
 
       {/* Audio Component */}
-      <PipecatClientAudio />
+      <RTVIClientAudio />
     </div>
   );
 }
