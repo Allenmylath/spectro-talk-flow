@@ -115,16 +115,16 @@ export function VideoInterface({
         )}
 
         {/* Video Controls Overlay */}
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 bg-black/50 backdrop-blur-sm rounded-lg p-2 opacity-90 hover:opacity-100 transition-opacity duration-200">
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 bg-black/70 backdrop-blur-sm rounded-lg p-3 opacity-90 hover:opacity-100 transition-opacity duration-200 z-50 pointer-events-auto">
           <Button
             variant="ghost"
             size="sm"
             onClick={onVideoToggle}
             className={cn(
-              "glass-panel p-2",
+              "h-10 w-10 p-0 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 transition-all duration-200",
               videoState.isVideoEnabled 
-                ? "text-white hover:bg-white/20" 
-                : "text-destructive hover:bg-destructive/20"
+                ? "text-white hover:text-white" 
+                : "text-red-400 hover:text-red-300"
             )}
           >
             {videoState.isVideoEnabled ? (
@@ -139,10 +139,10 @@ export function VideoInterface({
             size="sm"
             onClick={onAudioToggle}
             className={cn(
-              "glass-panel p-2",
+              "h-10 w-10 p-0 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 transition-all duration-200",
               !videoState.isMuted 
-                ? "text-white hover:bg-white/20" 
-                : "text-destructive hover:bg-destructive/20"
+                ? "text-white hover:text-white" 
+                : "text-red-400 hover:text-red-300"
             )}
           >
             {!videoState.isMuted ? (
@@ -152,12 +152,11 @@ export function VideoInterface({
             )}
           </Button>
 
-
           <Button
             variant="ghost"
             size="sm"
             onClick={toggleFullscreen}
-            className="glass-panel p-2 text-white hover:bg-white/20"
+            className="h-10 w-10 p-0 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white hover:text-white transition-all duration-200"
           >
             <Maximize2 className="h-4 w-4" />
           </Button>
@@ -166,7 +165,7 @@ export function VideoInterface({
             variant="ghost"
             size="sm"
             onClick={onSettingsClick}
-            className="glass-panel p-2 text-white hover:bg-white/20"
+            className="h-10 w-10 p-0 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white hover:text-white transition-all duration-200"
           >
             <Settings className="h-4 w-4" />
           </Button>
